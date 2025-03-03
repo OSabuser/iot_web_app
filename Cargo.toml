@@ -1,0 +1,11 @@
+[workspace]
+
+resolver = "2"
+
+members = [
+    "iot_protocol",
+    "smart_socket",
+    "iot_server",
+    "iot_client",
+    "iot_tui",
+]
