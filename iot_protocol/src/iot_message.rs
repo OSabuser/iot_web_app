@@ -11,7 +11,7 @@ pub enum CommandType {
 }
 
 /// Структура посылки
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct IotMessage {
     id: u8,
     command: CommandType,
@@ -47,7 +47,7 @@ impl IotMessage {
     }
 
     /// Сериализация сообщения в "сырые" байты
-    pub fn serialize_to_raw_byte_data(&mut self) -> Vec<u8> {
+    pub fn serialize_to_raw_byte_data(self) -> Vec<u8> {
         let mut raw_bytes = Vec::new();
         raw_bytes.push(self.id);
         raw_bytes.push(self.command as u8);
@@ -65,9 +65,7 @@ impl IotMessage {
     }
 
     /// Десериализация сообщения из "сырых" байт
-    pub fn deserialize_from_raw_byte_data(
-        raw_bytes: Vec<u8>,
-    ) -> Result<IotMessage, ReceptionError> {
+    pub fn deserialize_from_raw_byte_data(raw_bytes: Vec<u8>) -> Option<IotMessage> {
         let id = raw_bytes[0];
         let command = match raw_bytes[1] {
             1 => CommandType::SetPowerOn,

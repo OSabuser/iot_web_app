@@ -1,10 +1,10 @@
 use iot_error::{ReceptionError, TransmissionError};
 use std::io::{Read, Write};
 
-use iot_message::IotMessage;
+use iot_message::{CommandType, IotMessage};
 
 pub mod iot_client;
-pub mod iot_device;
+
 pub mod iot_error;
 pub mod iot_message;
 pub mod iot_server;
@@ -14,7 +14,7 @@ pub mod iot_server;
 /// Запрос: ID + команда + CRC
 /// Отклик: ID + команда + длина данных + данные + CRC
 fn send_message<Writer: Write>(
-    message: &mut IotMessage,
+    message: IotMessage,
     writer: &mut Writer,
 ) -> Result<(), iot_error::TransmissionError> {
     let raw_bytes = message.serialize_to_raw_byte_data();
@@ -51,5 +51,27 @@ fn receive_message<Reader: Read>(
         raw_message.append(&mut raw_bytes.to_vec());
     }
 
-    Ok(IotMessage::deserialize_from_raw_byte_data(raw_message))
+    if let Some(crc) = IotMessage::deserialize_from_raw_byte_data(raw_message) {
+        Ok(crc)
+    } else {
+        Err(ReceptionError::BadFormat)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    //use crate::iot_message::{CommandType, IotMessage};
+
+    #[test]
+    fn test_loopback_mode() {
+        let message = IotMessage::new(1, CommandType::SetPowerOn, "test".to_string());
+        let mut buffer: Vec<u8> = Vec::new();
+
+        send_message(message.clone(), &mut buffer).unwrap();
+
+        let received_message = receive_message(&mut buffer.as_slice()).unwrap();
+
+        assert_eq!(received_message, message);
+    }
 }
