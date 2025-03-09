@@ -27,6 +27,7 @@ name = "iot_server"
 version = "0.1.0"
 dependencies = [
  "iot_protocol",
+ "smart_socket",
 ]
 
 [[package]]

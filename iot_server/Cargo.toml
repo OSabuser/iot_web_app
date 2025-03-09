@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 iot_protocol = { path = "../iot_protocol" }
+smart_socket = { path = "../smart_socket" }

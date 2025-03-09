@@ -33,6 +33,21 @@ impl IotMessage {
         temp
     }
 
+    /// Получение вида команды
+    pub fn get_command_type(&self) -> CommandType {
+        self.command
+    }
+
+    /// Получение данных
+    pub fn get_message_data(&self) -> String {
+        self.message_data.clone()
+    }
+
+    /// Получение идентификатора устройства
+    pub fn get_id(&self) -> u8 {
+        self.id
+    }
+
     /// Расчёт CRC16 по алгоритму ARC
     pub fn calculate_crc(&self) -> u16 {
         let mut state = State::<ARC>::new();
@@ -117,7 +132,7 @@ mod tests {
     /// Проверка сериализации
     #[test]
     fn test_serialize() {
-        let mut command = IotMessage::new(1, CommandType::SetPowerOn, "test".to_string());
+        let command = IotMessage::new(1, CommandType::SetPowerOn, "test".to_string());
         assert_eq!(
             command.serialize_to_raw_byte_data(),
             vec![1, 1, 0, 4, 116, 101, 115, 116, 52, 14]
