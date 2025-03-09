@@ -24,8 +24,8 @@ impl IotMessage {
     pub fn new(device_id: u8, command: CommandType, data: String) -> Self {
         let mut temp = IotMessage {
             id: device_id,
-            command: command,
-            data_length: data.trim().as_bytes().len() as u16,
+            command,
+            data_length: data.trim().len() as u16,
             message_data: data,
             crc: 0,
         };
@@ -56,18 +56,19 @@ impl IotMessage {
 
         state.update(&[self.data_length.to_be_bytes()[0]]);
         state.update(&[self.data_length.to_be_bytes()[1]]);
-        state.update(&self.message_data.as_bytes());
+        state.update(self.message_data.as_bytes());
 
         state.get()
     }
 
     /// Сериализация сообщения в "сырые" байты
     pub fn serialize_to_raw_byte_data(self) -> Vec<u8> {
-        let mut raw_bytes = Vec::new();
-        raw_bytes.push(self.id);
-        raw_bytes.push(self.command as u8);
-        raw_bytes.push(self.data_length.to_be_bytes()[0]);
-        raw_bytes.push(self.data_length.to_be_bytes()[1]);
+        let mut raw_bytes = vec![
+            self.id,
+            self.command as u8,
+            self.data_length.to_be_bytes()[0],
+            self.data_length.to_be_bytes()[1],
+        ];
 
         if self.data_length > 0 {
             raw_bytes.append(&mut self.message_data.as_bytes().to_vec());
@@ -91,9 +92,9 @@ impl IotMessage {
         let data_length = u16::from_be_bytes([raw_bytes[2], raw_bytes[3]]);
 
         let message = IotMessage {
-            id: id,
-            command: command,
-            data_length: data_length,
+            id,
+            command,
+            data_length,
             message_data: String::from_utf8_lossy(&raw_bytes[4..(4 + data_length as usize)])
                 .to_string(),
             crc: u16::from_be_bytes([
